@@ -32,9 +32,9 @@ Query for packages::
 Find a user's tasks::
 
   03:14 < ktdreyer> helgabot: soandso's tasks
-  03:14 < helgabot> ktdreyer, soandso's kernel scratch build run time is 49 min
-                    53 secs
-                    (https://koji.example.com/koji/taskinfo?taskID=15729697)
+  03:14 < helgabot> ktdreyer, soandso's kernel scratch build should be done in
+                    1 hr 26 min
+                    (https://koji.example.com/koji/taskinfo?taskID=15741633)
 
 Installation
 ------------
