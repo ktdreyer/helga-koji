@@ -74,7 +74,7 @@ def describe_tasks(koji, task_match, client, channel, nick):
         defer.returnValue(msg)
     if len(tasks) == 1:
         task = tasks[0]
-        completion = None
+        est_complete = None
         if task.method == 'build' and task.state == task_states.OPEN:
             est_complete = yield task.estimate_completion()
         msg = describe_one_task(nick, task, task_match, est_complete)
