@@ -8,6 +8,7 @@ from helga_koji.util import describe_delta
 
 
 class TaskMatch(object):
+    """ Match Koji tasks for a given *user* and *state* """
     def __init__(self, user, state):
         self.user = user
         self.state = state
