@@ -7,7 +7,7 @@ from helga_koji.actions import get_build
 from helga_koji.actions import get_package
 from helga_koji.actions import user_tasks
 
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 
 logger = log.getLogger(__name__)
