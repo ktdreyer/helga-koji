@@ -44,9 +44,16 @@ it with ``pip``::
 
   pip install helga-koji
 
-You do not need to configure anything else in Helga's settings for this plugin.
-
 If you want to hack on the helga-koji source code, in your virtualenv
 where you are running Helga, clone a copy of this repository from GitHub and
 run
 ``python setup.py develop``.
+
+Configuration
+-------------
+
+helga-koji uses the `txkoji <https://pypi.python.org/pypi/txkoji>`_ library,
+which looks for configuration files at ``/etc/koji.conf.d/*.conf``. To
+configure helga-koji for your Koji instance, you must have a configuration file
+in this location on disk. This is how the normal `koji client
+<https://pypi.python.org/pypi/koji>`_ works.
