@@ -6,6 +6,7 @@ from helga import log
 from helga_koji.actions import get_build
 from helga_koji.actions import get_package
 from helga_koji.actions import user_tasks
+import helga_koji.signals
 
 __version__ = '1.1.0'
 
