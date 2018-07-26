@@ -68,7 +68,7 @@ def describe_tasks(koji, task_match, client, channel, nick):
     tasks = yield koji.listTasks(opts, qopts)
 
     # Filter out the child tasks. We don't need to be that literal here.
-    child_methods = ('buildArch', 'buildSRPMfromSCM')  # children of "build"
+    child_methods = ('buildArch', 'buildSRPMFromSCM')  # children of "build"
     tasks = [t for t in tasks if t.method not in child_methods]
     if not tasks:
         msg = describe_no_tasks(nick, task_match)
