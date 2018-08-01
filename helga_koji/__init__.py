@@ -1,5 +1,5 @@
 from txkoji import Connection
-from txkoji import KojiException
+from txkoji.exceptions import KojiException
 from twisted.internet import defer
 from helga.plugins import match, ResponseNotReady
 from helga import log
