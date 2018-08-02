@@ -61,6 +61,8 @@ def describe_build(koji, build_match, client, channel, nick):
         defer.returnValue(msg)
     build = builds[0]
     if build_match.which == 'current':
+        # TODO: if we catch txkoji's NoDescendentsError here, it means there's
+        # no way to estimate the build yet. Just link to the task.
         est_complete = yield build.estimate_completion()
         remaining = est_complete - datetime.utcnow()
         if remaining.total_seconds() > 0:
