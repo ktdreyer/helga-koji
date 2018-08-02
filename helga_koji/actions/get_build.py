@@ -56,8 +56,10 @@ def describe_build(koji, build_match, client, channel, nick):
     if len(builds) > 1:
         # In theory we could handle printing multiple builds, but for now this
         # is rare so I'm not implementing it.
-        tmpl = '{nick}, multiple {package} builds running at the moment.'
-        msg = tmpl.format(nick=nick, package=package)
+        pkg = yield koji.getPackage(package)
+        tmpl = '{nick}, {num} {package} builds running at the moment: {url}'
+        msg = tmpl.format(nick=nick, num=len(builds), package=package,
+                          url=pkg.url)
         defer.returnValue(msg)
     build = builds[0]
     if build_match.which == 'current':
