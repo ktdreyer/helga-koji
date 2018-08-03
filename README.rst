@@ -57,3 +57,20 @@ which looks for configuration files at ``/etc/koji.conf.d/*.conf``. To
 configure helga-koji for your Koji instance, you must have a configuration file
 in this location on disk. This is how the normal `koji client
 <https://pypi.python.org/pypi/koji>`_ works.
+
+TODO
+----
+
+Watching tasks::
+
+  < ktdreyer> helgabot: watch
+              https://koji.example.com/koji/taskinfo?taskID=12456
+  < helgabot> ktdreyer, that kernel scratch build should be done in 1 hr 26
+              min. I'll tell you when it's done.
+
+Or watch on behalf of someone else::
+
+  < ktdreyer> helgabot: watch
+              https://koji.example.com/koji/taskinfo?taskID=12456 for adeza
+  < helgabot> ktdreyer, that kernel scratch build should be done in 1 hr 26
+              min. I'll tell that person when it's done.
