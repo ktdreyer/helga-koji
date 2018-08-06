@@ -18,6 +18,8 @@ SKIP_METHODS = ('build-fullsource',
                 'createLiveCD',
                 'createrepo',
                 'tagNotification',
+                'vmExec',
+                'winbuild',
                 )
 
 
