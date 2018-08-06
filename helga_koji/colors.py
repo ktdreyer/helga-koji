@@ -20,7 +20,7 @@ def green(text):
 
 def blue(text):
     """ Return this text formatted blue """
-    return '\x0312%s\x03' % text
+    return '\x0302%s\x03' % text
 
 
 def purple(text):
