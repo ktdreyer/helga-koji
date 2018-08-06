@@ -1,6 +1,7 @@
 import smokesignal
 from twisted.internet import defer
 from txkoji.messages import BuildStateChange
+from txkoji.messages import TagUntag
 from helga_koji import colors
 from helga_koji.signals import util
 from helga import log
@@ -17,9 +18,6 @@ logger = log.getLogger(__name__)
 def build_state_change_callback(frame):
     """
     Process a "BuildStateChange" message.
-
-    Note we probably want to process brew.build.tag too, so we can skip all the
-    tagBuild noise in the brew.task listener.
     """
     event = BuildStateChange.from_frame(frame, util.koji)
 
@@ -35,6 +33,31 @@ def build_state_change_callback(frame):
                            state=state,
                            url=event.url)
     product = yield get_product(event)
+    defer.returnValue((message, product))
+
+
+@smokesignal.on('umb.eng.brew.build.tag')
+@smokesignal.on('umb.eng.brew.build.untag')
+@defer.inlineCallbacks
+def build_tag_untag(frame):
+    """
+    Process a "Tag"/"Untag" message.
+    """
+    event = TagUntag.from_frame(frame, util.koji)
+
+    user = yield event.user()
+    user = util.shorten_fqdn(user)
+
+    action = event.event.lower()
+    if action == 'tag':
+        mtmpl = "{user} tagged {nvr} into {tag}"
+    if action == 'untag':
+        mtmpl = "{user} untagged {nvr} from {tag}"
+
+    message = mtmpl.format(user=user,
+                           nvr=event.build.nvr,
+                           tag=event.tag)
+    product = util.product_from_name(event.tag)
     defer.returnValue((message, product))
 
 
