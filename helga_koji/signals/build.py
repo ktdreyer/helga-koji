@@ -1,7 +1,7 @@
-import json
 import smokesignal
 from twisted.internet import defer
-from txkoji.build import Build
+from txkoji.messages import BuildStateChange
+from helga_koji import colors
 from helga_koji.signals import util
 from helga import log
 
@@ -21,33 +21,25 @@ def build_state_change_callback(frame):
     Note we probably want to process brew.build.tag too, so we can skip all the
     tagBuild noise in the brew.task listener.
     """
-    build = from_state_change_umb_frame(frame)
+    event = BuildStateChange.from_frame(frame, util.koji)
 
-    yield util.populate_owner_name(build)
-    owner_name = util.shorten_fqdn(build.owner_name)
+    user = yield event.user()
+    user = util.shorten_fqdn(user)
 
-    mtmpl = "{owner_name}'s {nvr} {event} ({build_url})"
-    message = mtmpl.format(owner_name=owner_name,
-                           nvr=build.nvr,
-                           event=build.event,
-                           build_url=build.url)
-    product = yield get_product(build)
+    state = event.event.lower()
+    state = colorize(state)
+
+    mtmpl = "{user}'s {nvr} {state} ({url})"
+    message = mtmpl.format(user=user,
+                           nvr=event.build.nvr,
+                           state=state,
+                           url=event.url)
+    product = yield get_product(event)
     defer.returnValue((message, product))
 
 
-def from_state_change_umb_frame(frame):
-    dest = frame.headers['destination']
-    (_, event) = dest.rsplit('.', 1)
-    data = json.loads(frame.body)
-    info = data['info']
-    build = Build.fromDict(info)
-    build.connection = util.koji
-    build.event = event
-    return build
-
-
 @defer.inlineCallbacks
-def get_product(build):
+def get_product(event):
     """
     Return a "product" string for this build.
 
@@ -57,39 +49,25 @@ def get_product(build):
     :returns: deferred that when fired returns the build "product" string, or
               an empty string if no product could be determined.
     """
-    target = yield get_target(build)
+    build = event.build
+    target = yield build.target()
     if target:
         product = util.product_from_name(target)
         defer.returnValue(product)
-    tags = yield get_tags(build)
+    tags = yield tag_names(build)
     if tags:
         if len(tags) > 1:
             # Are the other ones relevant?
             logger.warning('%s has multiple tags: %s' % (build.url, tags))
         product = util.product_from_name(tags[0])
         defer.returnValue(product)
-    logger.error('found no tags or target name for %s' % build.url)
+    logger.error('found no tag nor target name for %s %s'
+                 % (event.build.state, event.build.url))
     defer.returnValue('')
 
 
 @defer.inlineCallbacks
-def get_target(build):
-    """
-    Find the name of this build's target.
-
-    :returns: deferred that when fired returns the build's task's target name,
-              or None if we could not find it.
-    """
-    task = yield build.task()
-    if not task:
-        logger.debug('no task found for %s' % build.url)
-        yield defer.succeed(None)
-        defer.returnValue(None)
-    defer.returnValue(task.target)
-
-
-@defer.inlineCallbacks
-def get_tags(build):
+def tag_names(build):
     """
     Find the names of the tags for this build.
 
@@ -99,3 +77,20 @@ def get_tags(build):
     tags = yield build.tags()
     names = [tag.name for tag in tags]
     defer.returnValue(names)
+
+
+def colorize(state):
+    """
+    A string like "building", "complete", "deleted", "failed", "canceled"
+    """
+    if state == 'building':
+        return colors.blue(state)
+    if state == 'complete':
+        return colors.green(state)
+    if state == 'deleted':
+        return colors.brown(state)
+    if state == 'failed':
+        return colors.red(state)
+    if state == 'canceled':
+        return colors.orange(state)
+    return state
