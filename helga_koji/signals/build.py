@@ -69,7 +69,6 @@ def get_product(build):
         product = util.product_from_name(tags[0])
         defer.returnValue(product)
     logger.error('found no tags or target name for %s' % build.url)
-    logger.error(build.params)  # debugging
     defer.returnValue('')
 
 
