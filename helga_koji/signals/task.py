@@ -2,7 +2,7 @@ import json
 import smokesignal
 from twisted.internet import defer
 from twisted.python.compat import StringType
-from txkoji.task import Task
+from txkoji.messages import TaskStateChange
 from helga_koji.signals import util
 from helga import log
 
@@ -33,38 +33,43 @@ SKIP_METHODS = ('build-fullsource',
 @defer.inlineCallbacks
 def task_state_change(frame):
     """ Process a "TaskStateChange" message. """
-    task = from_umb_frame(frame)
+    event = TaskStateChange.from_frame(frame, util.koji)
 
-    yield util.populate_owner_name(task)
-    owner_name = util.shorten_fqdn(task.owner_name)
-    task.tag_name = yield get_tag_name(task)
-    description = get_description(task)
-    state_name = task.event
+    user = yield event.user()
+    user = util.shorten_fqdn(user)
 
-    if not is_interesting(task):
+    tag_name = yield event.tag()
+
+    if not is_interesting(event.task, user):
         defer.returnValue(None)
 
-    mtmpl = "{owner_name}'s {description} task {state} ({url})"
-    message = mtmpl.format(owner_name=owner_name,
+    description = describe_event(event, tag_name)
+
+    # TODO: colors here
+    event_text = event.event.lower()  # "free", "open", "closed"
+
+    mtmpl = "{user}'s {description} task {event_text} ({url})"
+    message = mtmpl.format(user=user,
                            description=description,
-                           state=state_name,
-                           url=task.url)
-    if task.tag_name:
-        product = util.product_from_name(task.tag_name)
-    elif task.target:
-        product = util.product_from_name(task.target)
+                           event_text=event_text,
+                           url=event.url)
+    if tag_name:
+        product = util.product_from_name(tag_name)
+    elif event.task.target:
+        product = util.product_from_name(event.task.target)
     else:
-        logger.warn('found no tag nor target name for task %d' % task.id)
+        logger.warn('found no tag nor target name for task %d %s'
+                    % (event.task.id, event.task.state))
         product = ''
     defer.returnValue((message, product))
 
 
-def is_interesting(task):
-    if getattr(task, 'owner_name') in ('kojira', 'mbs'):
+def is_interesting(task, user):
+    if user in ('kojira', 'mbs'):
         return False
     if task.method in SKIP_METHODS:
         return False
-    if task.owner_name == 'tdawson' \
+    if user == 'tdawson' \
        and task.is_scratch \
        and task.target.startswith('rhel-8.0'):
         # skip rhel-8 scratch builds
@@ -72,17 +77,9 @@ def is_interesting(task):
     return True
 
 
-def from_umb_frame(frame):
-    data = json.loads(frame.body)
-    info = data['info']
-    task = Task.fromDict(info)
-    task.connection = util.koji
-    task.event = data['new']
-    return task
-
-
-def get_description(task):
+def describe_event(event, tag):
     """ Textual description for this task's method and attributes. """
+    task = event.task
     desc = task.method
     if task.is_scratch:
         desc = 'scratch %s' % desc
@@ -92,23 +89,6 @@ def get_description(task):
         desc += ' for %s' % task.target
     if task.arch:
         desc += ' for %s' % task.arch
-    if task.tag_name:
-        desc += ' for tag %s' % task.tag_name
+    if tag:
+        desc += ' for tag %s' % tag
     return desc
-
-
-@defer.inlineCallbacks
-def get_tag_name(task):
-    """
-    Return the name of the tag of this task.
-
-    :returns: str, or None if there is no tag for this task.
-    """
-    name_or_id = yield defer.succeed(task.tag)
-    if name_or_id is None:
-        defer.returnValue(None)
-    if isinstance(name_or_id, StringType):
-        defer.returnValue(name_or_id)
-    if isinstance(name_or_id, int):
-        name = yield task.connection.cache.tag_name(name_or_id)
-        defer.returnValue(name)
