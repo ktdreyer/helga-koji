@@ -61,6 +61,13 @@ in this location on disk. This is how the normal `koji client
 TODO
 ----
 
+Estimating tasks by URL::
+
+  < ktdreyer> helgabot: estimate
+              https://koji.example.com/koji/taskinfo?taskID=12456
+  < helgabot> ktdreyer, that kernel scratch build should be done in 1 hr 26
+              min.
+
 Watching tasks::
 
   < ktdreyer> helgabot: watch
