@@ -41,5 +41,8 @@ def product_from_name(name):
     :param name: eg. "ceph-3.0-rhel-7"
     :returns: eg. "ceph"
     """
+    if name.startswith('guest-'):
+        # deal with eg. "guest-rhel-X.0-image"
+        name = name[6:]
     parts = name.split('-', 1)
     return parts[0]
