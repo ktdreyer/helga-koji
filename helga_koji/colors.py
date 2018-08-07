@@ -1,3 +1,12 @@
+"""
+IRC color formatting.
+
+helga.settings.SERVER['TYPE'] must be "irc".
+
+TODO: support other chat protocols
+"""
+
+
 def red(text):
     """ Return this text formatted red """
     return '\x0304%s\x03' % text
