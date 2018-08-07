@@ -33,7 +33,9 @@ def build_state_change_callback(frame):
                            state=state,
                            url=event.url)
     product = yield get_product(event)
-    defer.returnValue((message, product))
+    if product:
+        defer.returnValue((message, product))
+    defer.returnValue(None)
 
 
 @smokesignal.on('umb.eng.brew.build.tag')
@@ -70,7 +72,7 @@ def get_product(event):
     build's first tag's name.
 
     :returns: deferred that when fired returns the build "product" string, or
-              an empty string if no product could be determined.
+              None if no product could be determined.
     """
     build = event.build
     target = yield build.target()
@@ -84,9 +86,13 @@ def get_product(event):
             logger.warning('%s has multiple tags: %s' % (build.url, tags))
         product = util.product_from_name(tags[0])
         defer.returnValue(product)
-    logger.error('found no tag nor target name for %s %s'
-                 % (event.build.state, event.build.url))
-    defer.returnValue('')
+    # If we have no target or tags, it's almost certainly a content generator
+    # build. For example, MBS's modulemd builds will have no target or tags
+    # when MBS first imports them to Koji.
+    # We cannot determine a product now, and the next best thing is to wait for
+    # the build to be tagged into a product-specific tag later in a separate
+    # event.
+    defer.returnValue(None)
 
 
 @defer.inlineCallbacks
