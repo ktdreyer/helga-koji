@@ -72,6 +72,7 @@ def describe_build(koji, build_match, client, channel, nick):
             delta_text = describe_delta(remaining)
         else:
             tmpl = '{nick}, {nvr} exceeds estimate by {delta_text} {url}'
+            tmpl += ' (total time so far: %s)' % describe_delta(build.duration)
             delta_text = describe_delta(remaining)
     else:
         tmpl = '{nick}, {nvr} build duration was {delta_text} {url}'
