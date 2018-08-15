@@ -26,6 +26,8 @@ class TaskMatch(object):
         # cleanup a possessive username
         if user.endswith("'s"):
             user = user[:-2]
+        if user.endswith("'"):
+            user = user[:-1]
         return klass(user, state)
 
 
