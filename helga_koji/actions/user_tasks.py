@@ -4,6 +4,7 @@ import re
 from twisted.internet import defer
 from helga import settings
 from txkoji import task_states
+from txkoji.task import NoDescendentsError
 from helga_koji.util import describe_delta
 
 
@@ -79,7 +80,12 @@ def describe_tasks(koji, task_match, client, channel, nick):
         task = tasks[0]
         est_complete = None
         if task.method == 'build' and task.state == task_states.OPEN:
-            est_complete = yield task.estimate_completion()
+            try:
+                est_complete = yield task.estimate_completion()
+            except NoDescendentsError:
+                # we cannot determine an est_complete value because the
+                # buildArch tasks haven't begun yet.
+                pass
         msg = describe_one_task(nick, task, task_match, est_complete)
         defer.returnValue(msg)
     msg = describe_multiple_tasks(nick, tasks, task_match)
