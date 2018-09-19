@@ -2,7 +2,6 @@ from datetime import datetime
 import re
 from twisted.internet import defer
 import txkoji.build_states
-from helga import settings
 from helga_koji.util import describe_delta
 
 
@@ -14,13 +13,12 @@ class BuildMatch(object):
 
 def match(message):
     """
-    "helga: last ceph build"
-    "helga: current ceph build"
+    "last ceph build"
+    "current ceph build"
 
     :returns: a BuildMatch if we matched, or None if no match.
     """
-    botnick = settings.NICK
-    pattern = re.compile('%s[,:]? (last|current) (\S+) build\??$' % botnick)
+    pattern = re.compile('^(last|current) (\S+) build\??$')
     m = re.match(pattern, message)
     if not m:
         return

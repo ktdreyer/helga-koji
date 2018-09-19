@@ -2,7 +2,6 @@ from datetime import datetime
 import posixpath
 import re
 from twisted.internet import defer
-from helga import settings
 from txkoji import task_states
 from txkoji.task import NoDescendentsError
 from helga_koji.util import describe_delta
@@ -34,14 +33,13 @@ class TaskMatch(object):
 
 def match(message):
     """
-    "helga: kdreyer's tasks"
-    "helga: kdreyer's task"
-    "helga: kdreyer tasks"
+    "kdreyer's tasks"
+    "kdreyer's task"
+    "kdreyer tasks"
 
     :returns: a TaskMatch if we matched, or None if not.
     """
-    botnick = settings.NICK
-    pattern = re.compile("%s[,:]? (.+) tasks?\??$" % botnick)
+    pattern = re.compile("(.+) tasks?\??$")
     m = re.match(pattern, message)
     if not m:
         return

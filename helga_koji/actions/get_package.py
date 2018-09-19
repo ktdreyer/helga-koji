@@ -1,16 +1,14 @@
 import re
 from twisted.internet import defer
-from helga import settings
 
 
 def match(message):
     """
-    "helga: ceph package"
+    "ceph package"
 
     :returns: a package name if we matched, or None if not.
     """
-    botnick = settings.NICK
-    pattern = re.compile('%s[,:]? (\S+) package\??$' % botnick)
+    pattern = re.compile('^(\S+) package\??$')
     m = re.match(pattern, message)
     if not m:
         return
