@@ -15,8 +15,13 @@ logger = log.getLogger(__name__)
 
 
 class MultiMatch(Plugin):
-    def __init__(self, actions, *args, **kwargs):
-        self.actions = actions
+    """
+    A plugin that can match several different "actions".
+
+    This plugin will call each action's "match()" method. If we find a match,
+    then we call self.run().
+    """
+    actions = ()
 
     def process(self, client, channel, nick, message):
         for action in self.actions:
