@@ -156,7 +156,7 @@ setup(name="helga-koji",
       ],
       entry_points=dict(
           helga_plugins=[
-              'koji = helga_koji:helga_koji',
+              'koji = helga_koji:HelgaKoji',
           ],
       ),
       cmdclass={'test': PyTest, 'bump': BumpCommand, 'release': ReleaseCommand},

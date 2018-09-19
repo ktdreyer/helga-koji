@@ -1,7 +1,7 @@
 from txkoji import Connection
 from txkoji.exceptions import KojiException
 from twisted.internet import defer
-from helga.plugins import match, ResponseNotReady
+from helga.plugins import Plugin, ResponseNotReady
 from helga import log
 from helga_koji.actions import get_build
 from helga_koji.actions import get_package
@@ -14,27 +14,32 @@ __version__ = '1.3.0'
 logger = log.getLogger(__name__)
 
 
-def match_koji(message):
-    for action in (get_build, get_package, user_tasks):
-        m = action.match(message)
-        if m:
-            return (action, m)
+class MultiMatch(Plugin):
+    def __init__(self, actions, *args, **kwargs):
+        self.actions = actions
+
+    def process(self, client, channel, nick, message):
+        for action in self.actions:
+            m = action.match(message)
+            if m:
+                return self.run(client, channel, nick, message, action, m)
 
 
-@match(match_koji)
-def helga_koji(client, channel, nick, message, action_and_match):
-    """
-    Match information related to Koji.
-    """
-    profile = 'brew'  # todo: make this configurable
-    koji = Connection(profile)
+class HelgaKoji(MultiMatch):
 
-    d = defer.succeed(koji)
-    (action, match) = action_and_match
-    for callback in action.callbacks:
-        d.addCallback(callback, match, client, channel, nick)
-        d.addErrback(send_err, client, channel)
-    raise ResponseNotReady
+    help = 'https://github.com/ktdreyer/helga-koji'
+
+    actions = (get_build, get_package, user_tasks)
+
+    def run(self, client, channel, nick, message, action, match):
+        profile = 'brew'  # todo: make this configurable
+        koji = Connection(profile)
+
+        d = defer.succeed(koji)
+        for callback in action.callbacks:
+            d.addCallback(callback, match, client, channel, nick)
+            d.addErrback(send_err, client, channel)
+        raise ResponseNotReady
 
 
 def send_err(e, client, channel):
