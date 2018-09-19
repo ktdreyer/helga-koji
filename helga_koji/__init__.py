@@ -7,6 +7,7 @@ from helga import log
 from helga import settings
 from helga_koji.actions import get_build
 from helga_koji.actions import get_package
+from helga_koji.actions import kojiweb
 from helga_koji.actions import user_tasks
 import helga_koji.signals
 
@@ -49,7 +50,7 @@ class HelgaKoji(MultiMatch):
 
     help = 'https://github.com/ktdreyer/helga-koji'
 
-    actions = (get_build, get_package, user_tasks)
+    actions = (get_build, get_package, kojiweb, user_tasks)
 
     def run(self, client, channel, nick, message, action, match):
         profile = 'brew'  # todo: make this configurable
