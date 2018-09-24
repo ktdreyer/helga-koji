@@ -64,8 +64,10 @@ def describe_tasks(koji, task_match, client, channel, nick):
         defer.returnValue(msg)
     owner = yield koji.getUser(task_match.user)
     if not owner:
-        tmpl = '{nick}, I could not find a koji user account for {user}'
-        msg = tmpl.format(nick=nick, user=task_match.user)
+        tmpl = '{nick}, I could not find a koji user account for {user}' \
+               ' at {url}'
+        url = posixpath.join(koji.weburl, 'users')
+        msg = tmpl.format(nick=nick, user=task_match.user, url=url)
         defer.returnValue(msg)
     opts = {'state': [state], 'owner': owner.id}
     qopts = {'order': 'priority,create_time'}
