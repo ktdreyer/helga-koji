@@ -53,6 +53,7 @@ def describe_tasks(koji, task_match, client, channel, nick):
     Describe this user's tasks in a message
     """
     if task_match.user == 'my':
+        # assume the user's nick is the koji ID.
         task_match.user = nick
     state_name = task_match.state.upper()
     try:
