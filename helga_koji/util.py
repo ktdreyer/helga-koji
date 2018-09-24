@@ -10,7 +10,9 @@ def describe_delta(delta):
     minutes, seconds = divmod(remainder, 60)
     if hours:
         return '%d hr %d min' % (hours, minutes)
-    return '%d min %d secs' % (minutes, seconds)
+    if minutes:
+        return '%d min %d secs' % (minutes, seconds)
+    return '%d secs' % seconds
 
 
 def describe_task(task):
