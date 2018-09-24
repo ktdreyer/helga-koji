@@ -37,7 +37,7 @@ def describe_kojiweb(koji, conn_and_url, client, channel, nick):
     elif isinstance(resource, Package):
         # print ongoing builds for this package?
         tmpl = 'that is the {package} package'
-        msg = tmpl.format(package=resource.package)
+        msg = tmpl.format(package=resource.name)
     elif hasattr(resource, 'name'):
         tmpl = 'that is {name}'
         msg = tmpl.format(name=resource.name)
