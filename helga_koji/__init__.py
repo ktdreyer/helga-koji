@@ -11,7 +11,7 @@ from helga_koji.actions import kojiweb
 from helga_koji.actions import user_tasks
 import helga_koji.signals
 
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 
 
 logger = log.getLogger(__name__)
