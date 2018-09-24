@@ -52,6 +52,8 @@ def describe_tasks(koji, task_match, client, channel, nick):
     """
     Describe this user's tasks in a message
     """
+    if task_match.user == 'my':
+        task_match.user = nick
     state_name = task_match.state.upper()
     try:
         state = getattr(task_states, state_name)
