@@ -35,11 +35,11 @@ def describe_build(koji, build_match, client, channel, nick):
     """
     package = build_match.package
     state = txkoji.build_states.COMPLETE
-    # note "order: -build_id" will list the newest (build timestamp) first.
-    opts = {'limit': 1, 'order': '-build_id'}
+    # note "order: -completion_time" will list the newest first.
+    opts = {'limit': 1, 'order': '-completion_time'}
     if build_match.which == 'current':
         state = txkoji.build_states.BUILDING
-        opts = {'order': '-build_id'}
+        opts = {'order': '-start_time'}
     builds = yield koji.listBuilds(package, state=state, queryOpts=opts)
     if not builds and build_match.which == 'current':
         msg = '{nick}, I could not find a running {package} build. ' \
