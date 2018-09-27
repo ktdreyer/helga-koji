@@ -36,10 +36,11 @@ class MultiMatch(Plugin):
         # If this is not a private message, we should only respond when the
         # user directly mentions our name.
         if channel != nick:
-            if self.prefix.match(message):
-                # Strip off our prefix so we can pass the main message string
-                # through to action.match()
-                message = self.prefix.sub('', message)
+            if not self.prefix.match(message):
+                return
+            # Strip off our prefix so we can pass the main message string
+            # through to action.match()
+            message = self.prefix.sub('', message)
         for action in self.actions:
             m = action.match(message)
             if m:
