@@ -53,10 +53,10 @@ Configuration
 -------------
 
 helga-koji uses the `txkoji <https://pypi.python.org/pypi/txkoji>`_ library,
-which looks for configuration files at ``/etc/koji.conf.d/*.conf``. To
-configure helga-koji for your Koji instance, you must have a configuration file
-in this location on disk. This is how the normal `koji client
-<https://pypi.python.org/pypi/koji>`_ works.
+which looks for configuration files at ``~/.koji/config.d/*.conf`` and
+``/etc/koji.conf.d/*.conf``. To configure helga-koji for your Koji instance,
+you must have configuration file(s) in this location on disk. This is how the
+normal `koji client <https://pypi.python.org/pypi/koji>`_ works.
 
 TODO
 ----
