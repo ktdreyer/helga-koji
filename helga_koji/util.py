@@ -9,8 +9,11 @@ def describe_delta(delta):
     """
     s = delta.total_seconds()
     s = abs(s)
-    hours, remainder = divmod(s, 3600)
+    days, remainder = divmod(s, 86400)
+    hours, remainder = divmod(remainder, 3600)
     minutes, seconds = divmod(remainder, 60)
+    if days:
+        return '%d d %d hr' % (days, hours)
     if hours:
         return '%d hr %d min' % (hours, minutes)
     if minutes:
