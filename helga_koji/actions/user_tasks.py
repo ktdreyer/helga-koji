@@ -1,10 +1,9 @@
-from datetime import datetime
 import posixpath
 import re
 from twisted.internet import defer
 from txkoji import task_states
 from txkoji.task import NoDescendentsError
-from helga_koji.util import describe_delta
+from helga_koji.util import describe_delta, describe_remaining
 
 
 class TaskMatch(object):
@@ -108,11 +107,7 @@ def describe_one_task(nick, task, task_match, est_complete=None):
     if task.is_scratch:
         method = 'scratch %s' % method
     if est_complete:
-        remaining = est_complete - datetime.utcnow()
-        if remaining.total_seconds() > 0:
-            duration = 'should be done in %s' % describe_delta(remaining)
-        else:
-            duration = 'exceeds estimate by %s' % describe_delta(remaining)
+        duration = describe_remaining(est_complete)
     else:
         if task.state in (task_states.FREE, task_states.OPEN):
             duration_tmpl = 'run time is %s'

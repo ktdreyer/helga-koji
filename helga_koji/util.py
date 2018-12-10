@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 def describe_delta(delta):
     """
     Describe this timedelta in human-readable terms.
@@ -13,6 +16,19 @@ def describe_delta(delta):
     if minutes:
         return '%d min %d secs' % (minutes, seconds)
     return '%d secs' % seconds
+
+
+def describe_remaining(est_complete):
+    """
+    Describe this estimated completion time in human-readable terms.
+
+    :param est_complete: datetime.datetime object
+    :returns: str, describing this estimated completion time.
+    """
+    remaining = est_complete - datetime.utcnow()
+    if remaining.total_seconds() > 0:
+        return 'should be done in %s' % describe_delta(remaining)
+    return 'exceeds estimate by %s' % describe_delta(remaining)
 
 
 def describe_task(task):
