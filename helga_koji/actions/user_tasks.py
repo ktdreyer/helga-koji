@@ -110,7 +110,7 @@ def describe_one_task(nick, task, task_match, est_complete=None):
     if est_complete:
         duration = describe_remaining(est_complete)
     else:
-        if task.state in (task_states.FREE, task_states.OPEN):
+        if task.state in task_states.ACTIVE_GROUP:
             duration_tmpl = 'run time is %s'
         else:
             duration_tmpl = 'run time was %s'
