@@ -82,7 +82,7 @@ def describe_tasks(koji, task_match, client, channel, nick):
     if len(tasks) == 1:
         task = tasks[0]
         est_complete = None
-        if task.method == 'build' and task.state == task_states.OPEN:
+        if task.state in task_states.ACTIVE_GROUP:
             try:
                 est_complete = yield task.estimate_completion()
             except NoDescendentsError:
