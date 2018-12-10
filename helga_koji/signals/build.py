@@ -2,7 +2,7 @@ import smokesignal
 from twisted.internet import defer
 from txkoji.messages import BuildStateChange
 from txkoji.messages import TagUntag
-from helga_koji import colors
+from helga_koji import colorize
 from helga_koji.signals import util
 from helga import log
 
@@ -25,7 +25,7 @@ def build_state_change_callback(frame):
     user = util.shorten_fqdn(user)
 
     state = event.event.lower()
-    state = colorize(state)
+    state = colorize.build_state(state)
 
     mtmpl = "{user}'s {nvr} {state} ({url})"
     message = mtmpl.format(user=user,
@@ -106,20 +106,3 @@ def tag_names(build):
     tags = yield build.tags()
     names = [tag.name for tag in tags]
     defer.returnValue(names)
-
-
-def colorize(state):
-    """
-    A string like "building", "complete", "deleted", "failed", "canceled"
-    """
-    if state == 'building':
-        return colors.blue(state)
-    if state == 'complete':
-        return colors.green(state)
-    if state == 'deleted':
-        return colors.brown(state)
-    if state == 'failed':
-        return colors.red(state)
-    if state == 'canceled':
-        return colors.orange(state)
-    return state

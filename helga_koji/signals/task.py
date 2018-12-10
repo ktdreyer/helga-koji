@@ -1,7 +1,7 @@
 import smokesignal
 from twisted.internet import defer
 from txkoji.messages import TaskStateChange
-from helga_koji import colors
+from helga_koji import colorize
 from helga_koji.signals import util
 from helga import log
 
@@ -45,7 +45,7 @@ def task_state_change(frame):
     description = describe_event(event, tag_name)
 
     event_text = event.event.lower()  # "free", "open", "closed"
-    event_text = colorize(event_text)
+    event_text = colorize.task_state(event_text)
 
     mtmpl = "{user}'s {description} task {event_text} ({url})"
     message = mtmpl.format(user=user,
@@ -91,22 +91,3 @@ def describe_event(event, tag):
     if tag:
         desc += ' for tag %s' % tag
     return desc
-
-
-def colorize(event_text):
-    """
-    A string like "free", "open", "closed"
-    """
-    if event_text == 'free':
-        return colors.purple(event_text)
-    if event_text == 'open':
-        return colors.orange(event_text)
-    if event_text == 'closed':
-        return colors.green(event_text)
-    if event_text == 'canceled':
-        return colors.brown(event_text)
-    # if event_text == 'assigned':
-    #     return colors.???(event_text)
-    if event_text == 'failed':
-        return colors.red(event_text)
-    return event_text
