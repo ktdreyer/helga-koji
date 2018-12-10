@@ -2,8 +2,7 @@ import posixpath
 import re
 from twisted.internet import defer
 from txkoji import task_states
-from txkoji.task import NoDescendentsError
-from helga_koji.util import describe_delta, describe_remaining
+from helga_koji import util
 
 
 class TaskMatch(object):
@@ -81,15 +80,8 @@ def describe_tasks(koji, task_match, client, channel, nick):
         defer.returnValue(msg)
     if len(tasks) == 1:
         task = tasks[0]
-        est_complete = None
-        if task.state in task_states.ACTIVE_GROUP:
-            try:
-                est_complete = yield task.estimate_completion()
-            except NoDescendentsError:
-                # we cannot determine an est_complete value because the
-                # buildArch tasks haven't begun yet.
-                pass
-        msg = describe_one_task(nick, task, task_match, est_complete)
+        description = yield util.describe_task(task, task_match.user)
+        msg = '%s, %s (%s)' % (nick, description, task.url)
         defer.returnValue(msg)
     msg = describe_multiple_tasks(nick, tasks, task_match)
     defer.returnValue(msg)
@@ -99,28 +91,6 @@ def describe_no_tasks(nick, task_match):
     """ No tasks matched """
     tmpl = '{nick}, I could not find {state} tasks for {user}.'
     msg = tmpl.format(nick=nick, state=task_match.state, user=task_match.user)
-    return msg
-
-
-def describe_one_task(nick, task, task_match, est_complete=None):
-    tmpl = "{nick}, {user}'s {package} {method} {duration} ({url})"
-    method = task.method
-    if task.is_scratch:
-        method = 'scratch %s' % method
-    if est_complete:
-        duration = describe_remaining(est_complete)
-    else:
-        if task.state in task_states.ACTIVE_GROUP:
-            duration_tmpl = 'run time is %s'
-        else:
-            duration_tmpl = 'run time was %s'
-        duration = duration_tmpl % describe_delta(task.duration)
-    msg = tmpl.format(nick=nick,
-                      user=task_match.user,
-                      package=task.package,
-                      method=method,
-                      duration=duration,
-                      url=task.url)
     return msg
 
 
