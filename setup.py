@@ -149,7 +149,7 @@ setup(name="helga-koji",
       packages=find_packages(),
       install_requires=[
           'helga',
-          'txkoji>=0.9.0',
+          'txkoji>=0.10.0',
       ],
       tests_require=[
           'pytest',
