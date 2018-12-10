@@ -1,4 +1,7 @@
 from datetime import datetime
+from twisted.internet import defer
+from helga_koji import colorize
+from txkoji.task import NoDescendentsError
 
 
 def describe_delta(delta):
@@ -34,19 +37,58 @@ def describe_remaining(est_complete):
     return 'exceeds estimate by %s' % describe_delta(remaining)
 
 
-def describe_task(task):
+def describe_task_state(task, delta):
+    """ Describe a task's state in human-readable terms.
+
+    :param task: txkoji.task.Task object
+    :returns: str describing this task's state.
+    """
+    state_name = task.state_name.lower()
+    state_colorized = colorize.task_state(state_name)
+    delta_text = describe_delta(delta)
+    if state_name == 'closed':
+        # use a term that's easier to understand
+        state_colorized = state_colorized.replace('closed', 'completed')
+        tmpl = '{state} in {delta}'
+    if state_name == 'canceled' or state_name == 'failed':
+        tmpl = '{state} {delta} into the build'
+    return tmpl.format(state=state_colorized, delta=delta_text)
+
+
+@defer.inlineCallbacks
+def describe_task(task, user=None):
     """ Describe this task in human-readable terms.
 
     :param task: txkoji.task.Task object
-    :returns: str, describing this task
+    :param user: Koji user account name, if you know it.
+    :returns: deferred that when fired returns a str, describing this task.
+              "joeuser's llvm scratch build should be done in 1 hr 21 min"
     """
-    desc = task.method
+    tmpl = "{user}'s {description} {state}"
+    if not user:
+        user = yield task.connection.cache.user_name(task.owner)
+    description = task.method
     if task.is_scratch:
-        desc = 'scratch %s' % desc
+        description = 'scratch %s' % description
     if task.package:
-        desc = '%s %s' % (task.package, desc)
+        description = '%s %s' % (task.package, description)
     if task.target:
-        desc += ' for %s' % task.target
+        description += ' for %s' % task.target
     if task.arch:
-        desc += ' for %s' % task.arch
-    return desc
+        description += ' for %s' % task.arch
+    if task.completed:
+        state = describe_task_state(task, task.duration)
+    else:
+        try:
+            est_complete = yield task.estimate_completion()
+        except NoDescendentsError:
+            est_complete = None
+        if est_complete:
+            state = describe_remaining(est_complete)
+        elif task.duration:
+            state = 'run time is %s' % describe_delta(task.duration)
+        else:
+            state_name = task.state_name.lower()
+            state = 'in %s state' % colorize(state_name)
+    result = tmpl.format(user=user, description=description, state=state)
+    defer.returnValue(result)

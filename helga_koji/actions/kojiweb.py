@@ -32,8 +32,7 @@ def describe_kojiweb(koji, conn_and_url, client, channel, nick):
     if isinstance(resource, Build):
         msg = yield describe_build(resource)
     elif isinstance(resource, Task):
-        desc = describe_task(resource)
-        msg = 'that is a %s task' % desc
+        msg = yield describe_task(resource)
     elif isinstance(resource, Package):
         # print ongoing builds for this package?
         tmpl = 'that is the {package} package'

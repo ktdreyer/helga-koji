@@ -36,6 +36,12 @@ Find a user's tasks::
                     1 hr 26 min
                     (https://koji.example.com/koji/taskinfo?taskID=15741633)
 
+Estimating tasks by URL::
+
+  < ktdreyer> helgabot: https://koji.example.com/koji/taskinfo?taskID=12456
+  < helgabot> ktdreyer, that kernel scratch build should be done in 1 hr 26
+              min.
+
 Installation
 ------------
 This Koji plugin is `available from PyPI
@@ -60,13 +66,6 @@ normal `koji client <https://pypi.python.org/pypi/koji>`_ works.
 
 TODO
 ----
-
-Estimating tasks by URL::
-
-  < ktdreyer> helgabot: estimate
-              https://koji.example.com/koji/taskinfo?taskID=12456
-  < helgabot> ktdreyer, that kernel scratch build should be done in 1 hr 26
-              min.
 
 Watching tasks::
 
